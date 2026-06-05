@@ -4,6 +4,7 @@ import ClinicScreen from './components/ClinicScreen';
 import PatientCaseScreen from './components/PatientCaseScreen';
 import ResultScreen from './components/ResultScreen';
 import RankProgressScreen from './components/RankProgressScreen';
+import PatientArchiveScreen from './components/PatientArchiveScreen';
 import { getRankForXp, getXpProgress } from './data/ranks';
 import { getRandomPatient } from './data/patientCases';
 import './App.css';
@@ -14,6 +15,7 @@ const SCREENS = {
   PATIENT: 'patient',
   RESULT: 'result',
   RANK: 'rank',
+  ARCHIVE: 'archive',
 };
 
 function App() {
@@ -27,6 +29,8 @@ function App() {
   const [selectedDiagnosis, setSelectedDiagnosis] = useState(null);
   const [selectedTreatment, setSelectedTreatment] = useState(null);
   const [lastResult, setLastResult] = useState(null);
+  const [rankUp, setRankUp] = useState(null);
+  const [patientReports, setPatientReports] = useState([]);
   const [returnScreen, setReturnScreen] = useState(SCREENS.HOME);
 
   const rank = getRankForXp(xp);
@@ -39,6 +43,11 @@ function App() {
   function openRankProgress(from) {
     setReturnScreen(from);
     setScreen(SCREENS.RANK);
+  }
+
+  function openPatientArchive(from) {
+    setReturnScreen(from);
+    setScreen(SCREENS.ARCHIVE);
   }
 
   function callNextPatient(excludeId = null) {
@@ -74,23 +83,54 @@ function App() {
       if (diagnosisCorrect) coinsGained = Math.floor(currentPatient.coinReward * 0.5);
     }
 
-    setXp((v) => v + xpGained);
+    const previousRank = getRankForXp(xp);
+    const newXp = xp + xpGained;
+    const newRank = getRankForXp(newXp);
+    const didRankUp = newRank.level > previousRank.level;
+
+    setXp(newXp);
     setReputation((v) => Math.max(0, v + reputationChange));
     setCoins((v) => v + coinsGained);
     setChaosPoints((v) => v + chaosGained);
+
+    const resultText = fullSuccess ? currentPatient.successResult : currentPatient.failResult;
+    const dateTime = new Date().toLocaleString();
+
+    setPatientReports((reports) => [
+      ...reports,
+      {
+        patientType: currentPatient.patientType,
+        category: currentPatient.category,
+        selectedDiagnosis,
+        selectedTreatment,
+        correctDiagnosis: currentPatient.correctDiagnosis,
+        correctTreatment: currentPatient.correctTreatment,
+        diagnosisCorrect,
+        treatmentCorrect,
+        resultText,
+        xpGained,
+        reputationChange,
+        coinsGained,
+        chaosGained,
+        dateTime,
+      },
+    ]);
 
     setLastResult({
       diagnosisCorrect,
       treatmentCorrect,
       fullSuccess,
-      resultText: fullSuccess ? currentPatient.successResult : currentPatient.failResult,
+      resultText,
       xpGained,
       reputationChange,
       coinsGained,
       chaosGained,
       patient: currentPatient,
+      selectedDiagnosis,
+      selectedTreatment,
     });
 
+    setRankUp(didRankUp ? newRank : null);
     setScreen(SCREENS.RESULT);
   }
 
@@ -104,7 +144,7 @@ function App() {
         <HomeScreen
           onStartGame={startGame}
           onRankProgress={() => openRankProgress(SCREENS.HOME)}
-          onPatientArchive={() => {}}
+          onPatientArchive={() => openPatientArchive(SCREENS.HOME)}
         />
       )}
 
@@ -137,8 +177,17 @@ function App() {
       {screen === SCREENS.RESULT && lastResult && (
         <ResultScreen
           result={lastResult}
+          rank={rank}
+          rankUp={rankUp}
           onNextPatient={handleNextPatient}
           onClinic={() => setScreen(SCREENS.CLINIC)}
+        />
+      )}
+
+      {screen === SCREENS.ARCHIVE && (
+        <PatientArchiveScreen
+          reports={patientReports}
+          onBackToClinic={() => setScreen(SCREENS.CLINIC)}
         />
       )}
 

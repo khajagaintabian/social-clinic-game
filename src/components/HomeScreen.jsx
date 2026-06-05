@@ -22,13 +22,7 @@ export default function HomeScreen({ onStartGame, onRankProgress, onPatientArchi
         <button type="button" className="btn btn--secondary" onClick={onRankProgress}>
           Rank Progress
         </button>
-        <button
-          type="button"
-          className="btn btn--secondary btn--disabled"
-          onClick={onPatientArchive}
-          disabled
-          title="Coming soon"
-        >
+        <button type="button" className="btn btn--secondary" onClick={onPatientArchive}>
           Patient Archive
         </button>
       </nav>

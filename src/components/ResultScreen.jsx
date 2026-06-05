@@ -1,6 +1,27 @@
+import { useState } from 'react';
 import StatCard from './StatCard';
 
-export default function ResultScreen({ result, onNextPatient, onClinic }) {
+function buildReportText({ patient, selectedDiagnosis, selectedTreatment, fullSuccess, rankTitle }) {
+  return [
+    'SOCIAL CLINIC REPORT',
+    `Patient: ${patient.patientType}`,
+    `Category: ${patient.category}`,
+    `Diagnosis: ${selectedDiagnosis}`,
+    `Treatment: ${selectedTreatment}`,
+    `Status: ${fullSuccess ? 'Cured' : 'Chaos'}`,
+    `Doctor Rank: ${rankTitle}`,
+  ].join('\n');
+}
+
+export default function ResultScreen({
+  result,
+  rank,
+  rankUp,
+  onNextPatient,
+  onClinic,
+}) {
+  const [copyStatus, setCopyStatus] = useState(null);
+
   const {
     diagnosisCorrect,
     treatmentCorrect,
@@ -11,13 +32,43 @@ export default function ResultScreen({ result, onNextPatient, onClinic }) {
     coinsGained,
     chaosGained,
     patient,
+    selectedDiagnosis,
+    selectedTreatment,
   } = result;
+
+  async function handleCopyReport() {
+    const text = buildReportText({
+      patient,
+      selectedDiagnosis,
+      selectedTreatment,
+      fullSuccess,
+      rankTitle: rank.title,
+    });
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyStatus('copied');
+    } catch {
+      setCopyStatus('failed');
+    }
+
+    setTimeout(() => setCopyStatus(null), 2500);
+  }
 
   return (
     <div className="screen result-screen">
       <header className="screen-header">
         <h2 className="screen-header__title">Treatment Report</h2>
       </header>
+
+      {rankUp && (
+        <div className="rank-up-banner" role="status">
+          <span className="rank-up-banner__icon" aria-hidden="true">⬆</span>
+          <p>
+            Rank Up: You are now <strong>{rankUp.title}</strong>. Society remains unstable.
+          </p>
+        </div>
+      )}
 
       <div className={`result-banner ${fullSuccess ? 'result-banner--success' : 'result-banner--fail'}`}>
         <span className="result-banner__icon" aria-hidden="true">
@@ -29,6 +80,56 @@ export default function ResultScreen({ result, onNextPatient, onClinic }) {
           </h3>
           <p className="result-banner__patient">{patient.patientType}</p>
         </div>
+      </div>
+
+      <div className="clinic-report card">
+        <h4 className="clinic-report__heading">Social Clinic Report</h4>
+        <dl className="clinic-report__list">
+          <div className="clinic-report__row">
+            <dt>Patient</dt>
+            <dd>{patient.patientType}</dd>
+          </div>
+          <div className="clinic-report__row">
+            <dt>Category</dt>
+            <dd>{patient.category}</dd>
+          </div>
+          <div className="clinic-report__row">
+            <dt>Diagnosis</dt>
+            <dd className={diagnosisCorrect ? 'clinic-report__correct' : 'clinic-report__incorrect'}>
+              {selectedDiagnosis}
+            </dd>
+          </div>
+          <div className="clinic-report__row">
+            <dt>Treatment</dt>
+            <dd className={treatmentCorrect ? 'clinic-report__correct' : 'clinic-report__incorrect'}>
+              {selectedTreatment}
+            </dd>
+          </div>
+          <div className="clinic-report__row">
+            <dt>Status</dt>
+            <dd className={fullSuccess ? 'clinic-report__correct' : 'clinic-report__incorrect'}>
+              {fullSuccess ? 'Cured' : 'Chaos'}
+            </dd>
+          </div>
+          <div className="clinic-report__row">
+            <dt>Doctor Rank</dt>
+            <dd>{rank.title}</dd>
+          </div>
+        </dl>
+
+        <button type="button" className="btn btn--secondary btn--large" onClick={handleCopyReport}>
+          Copy Report Text
+        </button>
+        {copyStatus === 'copied' && (
+          <p className="copy-feedback copy-feedback--success" role="status">
+            Report copied to clipboard.
+          </p>
+        )}
+        {copyStatus === 'failed' && (
+          <p className="copy-feedback copy-feedback--fail" role="status">
+            Could not copy report. Please try again.
+          </p>
+        )}
       </div>
 
       <div className="result-checks card">

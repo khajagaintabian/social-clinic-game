@@ -506,6 +506,208 @@
   margin-top: 0.5rem;
 }
 
+/* Rank-up banner */
+.rank-up-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: linear-gradient(135deg, #fdf0ee, #fff8e6);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius);
+  animation: fadeIn 0.35s ease;
+}
+
+.rank-up-banner__icon {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-accent);
+}
+
+.rank-up-banner p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--color-navy);
+}
+
+.rank-up-banner strong {
+  color: var(--color-accent);
+}
+
+/* Clinic report */
+.clinic-report__heading {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+.clinic-report__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.clinic-report__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.clinic-report__row dt {
+  font-weight: 600;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+.clinic-report__row dd {
+  text-align: right;
+  font-weight: 600;
+  color: var(--color-navy);
+}
+
+.clinic-report__correct {
+  color: var(--color-success);
+}
+
+.clinic-report__incorrect {
+  color: var(--color-accent);
+}
+
+.copy-feedback {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.copy-feedback--success {
+  color: var(--color-success);
+}
+
+.copy-feedback--fail {
+  color: var(--color-accent);
+}
+
+/* Patient archive */
+.archive-screen__intro {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.archive-screen__empty {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.archive-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.archive-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.archive-card__patient {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-navy);
+}
+
+.archive-card__category {
+  font-size: 0.8rem;
+  color: var(--color-accent);
+  font-weight: 600;
+  margin-top: 0.15rem;
+}
+
+.archive-card__status {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.25rem 0.5rem;
+  border-radius: 99px;
+  flex-shrink: 0;
+}
+
+.archive-card__status--success {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.archive-card__status--fail {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.archive-card__details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.archive-card__row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  font-size: 0.85rem;
+}
+
+.archive-card__row dt {
+  font-weight: 600;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.archive-card__row dd {
+  color: var(--color-text);
+  line-height: 1.4;
+}
+
+.archive-card__correct {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.archive-card__incorrect {
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.archive-card__rewards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.archive-card__date {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+
 /* Rank progress */
 .rank-screen__summary {
   font-size: 0.9rem;
