@@ -4,6 +4,7 @@ export default function HomeScreen({
   onStartGame,
   onRankProgress,
   onPatientArchive,
+  onAchievements,
   onResetGame,
 }) {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
@@ -39,6 +40,9 @@ export default function HomeScreen({
         <button type="button" className="btn btn--secondary" onClick={onPatientArchive}>
           Patient Archive
         </button>
+        <button type="button" className="btn btn--secondary" onClick={onAchievements}>
+          Achievements
+        </button>
       </nav>
 
       <div className="home-screen__settings">
@@ -73,7 +77,7 @@ export default function HomeScreen({
 
       <footer className="home-screen__footer">
         <span>Social Clinic: Diagnosis of Society</span>
-        <span className="home-screen__version">Phase 3</span>
+        <span className="home-screen__version">Phase 4</span>
       </footer>
     </div>
   );

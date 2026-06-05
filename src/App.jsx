@@ -5,8 +5,11 @@ import PatientCaseScreen from './components/PatientCaseScreen';
 import ResultScreen from './components/ResultScreen';
 import RankProgressScreen from './components/RankProgressScreen';
 import PatientArchiveScreen from './components/PatientArchiveScreen';
+import AchievementsScreen from './components/AchievementsScreen';
 import { getRankForXp, getXpProgress } from './data/ranks';
 import { getRandomPatient, hasUnlockedPatients } from './data/patientCases';
+import { evaluateNewAchievements } from './data/achievements';
+import { getResultStatus } from './utils/resultStatus';
 import {
   loadGameState,
   saveGameState,
@@ -24,6 +27,7 @@ const SCREENS = {
   RESULT: 'result',
   RANK: 'rank',
   ARCHIVE: 'archive',
+  ACHIEVEMENTS: 'achievements',
 };
 
 function App() {
@@ -41,6 +45,7 @@ function App() {
   const [lastResult, setLastResult] = useState(null);
   const [rankUp, setRankUp] = useState(null);
   const [patientReports, setPatientReports] = useState(saved.patientReports);
+  const [unlockedAchievements, setUnlockedAchievements] = useState(saved.unlockedAchievements);
   const [returnScreen, setReturnScreen] = useState(SCREENS.HOME);
   const [lastPlayedCaseId, setLastPlayedCaseId] = useState(saved.lastPlayedCaseId);
   const [selectedDepartment, setSelectedDepartment] = useState(saved.selectedDepartment);
@@ -57,6 +62,7 @@ function App() {
       chaosPoints,
       patientsCured,
       patientReports,
+      unlockedAchievements,
       lastPlayedCaseId,
       selectedDepartment,
       dailySummary: normalizeDailySummary(dailySummary),
@@ -68,6 +74,7 @@ function App() {
     chaosPoints,
     patientsCured,
     patientReports,
+    unlockedAchievements,
     lastPlayedCaseId,
     selectedDepartment,
     dailySummary,
@@ -85,6 +92,11 @@ function App() {
   function openPatientArchive(from) {
     setReturnScreen(from);
     setScreen(SCREENS.ARCHIVE);
+  }
+
+  function openAchievements(from) {
+    setReturnScreen(from);
+    setScreen(SCREENS.ACHIEVEMENTS);
   }
 
   function handleDepartmentChange(department) {
@@ -109,6 +121,7 @@ function App() {
     const diagnosisCorrect = selectedDiagnosis === currentPatient.correctDiagnosis;
     const treatmentCorrect = selectedTreatment === currentPatient.correctTreatment;
     const fullSuccess = diagnosisCorrect && treatmentCorrect;
+    const resultStatus = getResultStatus(diagnosisCorrect, treatmentCorrect);
 
     let xpGained = 0;
     let reputationChange = 0;
@@ -119,7 +132,6 @@ function App() {
       xpGained = currentPatient.xpReward;
       reputationChange = currentPatient.reputationReward;
       coinsGained = currentPatient.coinReward;
-      setPatientsCured((n) => n + 1);
     } else {
       const partialXp = Math.floor(currentPatient.xpReward * 0.3);
       xpGained = diagnosisCorrect || treatmentCorrect ? partialXp : 0;
@@ -132,11 +144,16 @@ function App() {
     const newXp = xp + xpGained;
     const newRank = getRankForXp(newXp);
     const didRankUp = newRank.level > previousRank.level;
+    const newReputation = Math.max(0, reputation + reputationChange);
+    const newCoins = coins + coinsGained;
+    const newChaosPoints = chaosPoints + chaosGained;
+    const newPatientsCured = fullSuccess ? patientsCured + 1 : patientsCured;
 
     setXp(newXp);
-    setReputation((v) => Math.max(0, v + reputationChange));
-    setCoins((v) => v + coinsGained);
-    setChaosPoints((v) => v + chaosGained);
+    setReputation(newReputation);
+    setCoins(newCoins);
+    setChaosPoints(newChaosPoints);
+    setPatientsCured(newPatientsCured);
 
     setDailySummary((prev) => {
       const base = normalizeDailySummary(prev);
@@ -154,30 +171,50 @@ function App() {
     const resultText = fullSuccess ? currentPatient.successResult : currentPatient.failResult;
     const dateTime = new Date().toLocaleString();
 
-    setPatientReports((reports) => [
-      ...reports,
-      {
-        patientType: currentPatient.patientType,
-        category: currentPatient.category,
-        selectedDiagnosis,
-        selectedTreatment,
-        correctDiagnosis: currentPatient.correctDiagnosis,
-        correctTreatment: currentPatient.correctTreatment,
-        diagnosisCorrect,
-        treatmentCorrect,
-        resultText,
-        xpGained,
-        reputationChange,
-        coinsGained,
-        chaosGained,
-        dateTime,
-      },
-    ]);
+    const newReport = {
+      patientType: currentPatient.patientType,
+      category: currentPatient.category,
+      department: currentPatient.department,
+      selectedDiagnosis,
+      selectedTreatment,
+      correctDiagnosis: currentPatient.correctDiagnosis,
+      correctTreatment: currentPatient.correctTreatment,
+      diagnosisCorrect,
+      treatmentCorrect,
+      resultStatus,
+      resultText,
+      xpGained,
+      reputationChange,
+      coinsGained,
+      chaosGained,
+      dateTime,
+    };
+
+    const updatedReports = [...patientReports, newReport];
+    setPatientReports(updatedReports);
+
+    const newlyUnlocked = evaluateNewAchievements({
+      xp: newXp,
+      reputation: newReputation,
+      coins: newCoins,
+      chaosPoints: newChaosPoints,
+      patientsCured: newPatientsCured,
+      patientReports: updatedReports,
+      unlockedAchievements,
+    });
+
+    if (newlyUnlocked.length > 0) {
+      setUnlockedAchievements((prev) => [
+        ...prev,
+        ...newlyUnlocked.map((achievement) => achievement.id),
+      ]);
+    }
 
     setLastResult({
       diagnosisCorrect,
       treatmentCorrect,
       fullSuccess,
+      resultStatus,
       resultText,
       xpGained,
       reputationChange,
@@ -186,6 +223,7 @@ function App() {
       patient: currentPatient,
       selectedDiagnosis,
       selectedTreatment,
+      newAchievements: newlyUnlocked,
     });
 
     setRankUp(didRankUp ? newRank : null);
@@ -207,6 +245,7 @@ function App() {
     setChaosPoints(INITIAL_GAME_STATE.chaosPoints);
     setPatientsCured(INITIAL_GAME_STATE.patientsCured);
     setPatientReports(INITIAL_GAME_STATE.patientReports);
+    setUnlockedAchievements(INITIAL_GAME_STATE.unlockedAchievements);
     setLastPlayedCaseId(INITIAL_GAME_STATE.lastPlayedCaseId);
     setSelectedDepartment(INITIAL_GAME_STATE.selectedDepartment);
     setDailySummary(createFreshDailySummary());
@@ -227,6 +266,7 @@ function App() {
           onStartGame={startGame}
           onRankProgress={() => openRankProgress(SCREENS.HOME)}
           onPatientArchive={() => openPatientArchive(SCREENS.HOME)}
+          onAchievements={() => openAchievements(SCREENS.HOME)}
           onResetGame={resetGame}
         />
       )}
@@ -266,6 +306,7 @@ function App() {
           result={lastResult}
           rank={rank}
           rankUp={rankUp}
+          newAchievements={lastResult.newAchievements ?? []}
           onNextPatient={handleNextPatient}
           onClinic={() => setScreen(SCREENS.CLINIC)}
         />
@@ -275,6 +316,13 @@ function App() {
         <PatientArchiveScreen
           reports={patientReports}
           onBackToClinic={() => setScreen(SCREENS.CLINIC)}
+        />
+      )}
+
+      {screen === SCREENS.ACHIEVEMENTS && (
+        <AchievementsScreen
+          unlockedAchievements={unlockedAchievements}
+          onBack={() => setScreen(returnScreen)}
         />
       )}
 

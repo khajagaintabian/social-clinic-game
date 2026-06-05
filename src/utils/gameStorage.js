@@ -39,6 +39,7 @@ export const INITIAL_GAME_STATE = {
   chaosPoints: 0,
   patientsCured: 0,
   patientReports: [],
+  unlockedAchievements: [],
   lastPlayedCaseId: null,
   selectedDepartment: 'All',
   dailySummary: createFreshDailySummary(),
@@ -57,6 +58,9 @@ export function loadGameState() {
       chaosPoints: typeof parsed.chaosPoints === 'number' ? parsed.chaosPoints : 0,
       patientsCured: typeof parsed.patientsCured === 'number' ? parsed.patientsCured : 0,
       patientReports: Array.isArray(parsed.patientReports) ? parsed.patientReports : [],
+      unlockedAchievements: Array.isArray(parsed.unlockedAchievements)
+        ? parsed.unlockedAchievements
+        : [],
       lastPlayedCaseId: typeof parsed.lastPlayedCaseId === 'number' ? parsed.lastPlayedCaseId : null,
       selectedDepartment: DEPARTMENTS.includes(parsed.selectedDepartment)
         ? parsed.selectedDepartment

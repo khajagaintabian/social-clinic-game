@@ -1,13 +1,26 @@
 import StatCard from './StatCard';
+import { getResultStatus } from '../utils/resultStatus';
 
 function formatReportDate(dateTime) {
   return dateTime;
 }
 
+function getStatusClass(resultStatus) {
+  if (resultStatus === 'Fully Cured') return 'archive-card__status--success';
+  if (resultStatus === 'Partially Cured') return 'archive-card__status--partial';
+  return 'archive-card__status--fail';
+}
+
+function resolveResultStatus(report) {
+  if (report.resultStatus) return report.resultStatus;
+  return getResultStatus(report.diagnosisCorrect, report.treatmentCorrect);
+}
+
 export default function PatientArchiveScreen({ reports, onBackToClinic }) {
   const totalHandled = reports.length;
-  const successCount = reports.filter((r) => r.diagnosisCorrect && r.treatmentCorrect).length;
-  const failedCount = reports.filter((r) => !r.diagnosisCorrect || !r.treatmentCorrect).length;
+  const successCount = reports.filter((r) => resolveResultStatus(r) === 'Fully Cured').length;
+  const partialCount = reports.filter((r) => resolveResultStatus(r) === 'Partially Cured').length;
+  const failedCount = reports.filter((r) => resolveResultStatus(r) === 'Society Still Unsafe').length;
 
   return (
     <div className="screen archive-screen">
@@ -22,18 +35,9 @@ export default function PatientArchiveScreen({ reports, onBackToClinic }) {
 
       <div className="stats-grid">
         <StatCard label="Total Handled" value={totalHandled} icon="📋" />
-        <StatCard
-          label="Cured / Success"
-          value={successCount}
-          icon="✅"
-          variant="success"
-        />
-        <StatCard
-          label="Failed / Chaos"
-          value={failedCount}
-          icon="💥"
-          variant="chaos"
-        />
+        <StatCard label="Fully Cured" value={successCount} icon="✅" variant="success" />
+        <StatCard label="Partial" value={partialCount} icon="⚠" variant="default" />
+        <StatCard label="Unsafe" value={failedCount} icon="💥" variant="chaos" />
       </div>
 
       {reports.length === 0 ? (
@@ -43,18 +47,19 @@ export default function PatientArchiveScreen({ reports, onBackToClinic }) {
       ) : (
         <ul className="archive-list">
           {[...reports].reverse().map((report, index) => {
-            const success = report.diagnosisCorrect && report.treatmentCorrect;
+            const resultStatus = resolveResultStatus(report);
+
             return (
               <li key={`${report.dateTime}-${index}`} className="archive-card card">
                 <div className="archive-card__header">
                   <div>
                     <h3 className="archive-card__patient">{report.patientType}</h3>
-                    <p className="archive-card__category">{report.category}</p>
+                    <p className="archive-card__category">
+                      {report.department ?? report.category}
+                    </p>
                   </div>
-                  <span
-                    className={`archive-card__status ${success ? 'archive-card__status--success' : 'archive-card__status--fail'}`}
-                  >
-                    {success ? 'Cured' : 'Chaos'}
+                  <span className={`archive-card__status ${getStatusClass(resultStatus)}`}>
+                    {resultStatus}
                   </span>
                 </div>
 

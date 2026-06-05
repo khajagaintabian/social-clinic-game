@@ -2,6 +2,8 @@ import StatCard from './StatCard';
 import XPBar from './XPBar';
 import { DEPARTMENT_OPTIONS } from '../data/patientCases';
 
+const SOCIAL_SURGEON_LEVEL = 5;
+
 function formatSigned(value) {
   if (value > 0) return `+${value}`;
   return String(value);
@@ -22,6 +24,8 @@ export default function ClinicScreen({
   onRankProgress,
   onHome,
 }) {
+  const socialSurgeryUnlocked = rank.level >= SOCIAL_SURGEON_LEVEL;
+
   return (
     <div className="screen clinic-screen">
       <header className="screen-header">
@@ -106,6 +110,27 @@ export default function ClinicScreen({
             </button>
           ))}
         </div>
+      </div>
+
+      <div
+        className={`social-surgery-teaser card${socialSurgeryUnlocked ? ' social-surgery-teaser--unlocked' : ' social-surgery-teaser--locked'}`}
+      >
+        <div className="social-surgery-teaser__header">
+          <span className="social-surgery-teaser__icon" aria-hidden="true">
+            {socialSurgeryUnlocked ? '🩺' : '🔒'}
+          </span>
+          <h3 className="social-surgery-teaser__title">Social Surgery</h3>
+        </div>
+        {socialSurgeryUnlocked ? (
+          <p className="social-surgery-teaser__text">
+            Social Surgery unlocked soon. The operating room is being prepared. Society has been warned.
+          </p>
+        ) : (
+          <p className="social-surgery-teaser__text">
+            Social Surgery locked. Reach Social Surgeon rank to unlock surgical treatments like Ego Removal
+            and Gossip Gland Extraction.
+          </p>
+        )}
       </div>
 
       <div className="clinic-screen__waiting card">

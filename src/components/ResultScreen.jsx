@@ -1,22 +1,18 @@
 import { useState } from 'react';
 import StatCard from './StatCard';
-
-function buildReportText({ patient, selectedDiagnosis, selectedTreatment, fullSuccess, rankTitle }) {
-  return [
-    'SOCIAL CLINIC REPORT',
-    `Patient: ${patient.patientType}`,
-    `Category: ${patient.category}`,
-    `Diagnosis: ${selectedDiagnosis}`,
-    `Treatment: ${selectedTreatment}`,
-    `Status: ${fullSuccess ? 'Cured' : 'Chaos'}`,
-    `Doctor Rank: ${rankTitle}`,
-  ].join('\n');
-}
+import { buildShortPostText, buildFullReportText } from '../utils/reportFormats';
+import {
+  getResultStatus,
+  isFullSuccess,
+  isPartialSuccess,
+  RESULT_STATUS,
+} from '../utils/resultStatus';
 
 export default function ResultScreen({
   result,
   rank,
   rankUp,
+  newAchievements = [],
   onNextPatient,
   onClinic,
 }) {
@@ -25,7 +21,7 @@ export default function ResultScreen({
   const {
     diagnosisCorrect,
     treatmentCorrect,
-    fullSuccess,
+    resultStatus,
     resultText,
     xpGained,
     reputationChange,
@@ -36,24 +32,53 @@ export default function ResultScreen({
     selectedTreatment,
   } = result;
 
-  async function handleCopyReport() {
-    const text = buildReportText({
-      patient,
-      selectedDiagnosis,
-      selectedTreatment,
-      fullSuccess,
-      rankTitle: rank.title,
-    });
+  const fullSuccess = isFullSuccess(resultStatus);
+  const partialSuccess = isPartialSuccess(resultStatus);
 
+  async function copyText(text, statusKey) {
     try {
       await navigator.clipboard.writeText(text);
-      setCopyStatus('copied');
+      setCopyStatus(statusKey);
     } catch {
       setCopyStatus('failed');
     }
 
     setTimeout(() => setCopyStatus(null), 2500);
   }
+
+  function handleCopyShortPost() {
+    const text = buildShortPostText({
+      patient,
+      selectedDiagnosis,
+      selectedTreatment,
+      diagnosisCorrect,
+      treatmentCorrect,
+    });
+    copyText(text, 'short-copied');
+  }
+
+  function handleCopyFullReport() {
+    const text = buildFullReportText({
+      patient,
+      selectedDiagnosis,
+      selectedTreatment,
+      diagnosisCorrect,
+      treatmentCorrect,
+      rankTitle: rank.title,
+      xpGained,
+      reputationChange,
+      chaosGained,
+    });
+    copyText(text, 'full-copied');
+  }
+
+  const bannerClass = fullSuccess
+    ? 'result-banner--success'
+    : partialSuccess
+      ? 'result-banner--partial'
+      : 'result-banner--fail';
+
+  const bannerIcon = fullSuccess ? '✓' : partialSuccess ? '~' : '⚠';
 
   return (
     <div className="screen result-screen">
@@ -70,14 +95,23 @@ export default function ResultScreen({
         </div>
       )}
 
-      <div className={`result-banner ${fullSuccess ? 'result-banner--success' : 'result-banner--fail'}`}>
+      {newAchievements.length > 0 && (
+        <div className="achievement-unlock-banner" role="status">
+          {newAchievements.map((achievement) => (
+            <p key={achievement.id}>
+              <span className="achievement-unlock-banner__icon" aria-hidden="true">🏆</span>
+              Achievement Unlocked: <strong>{achievement.title}</strong>
+            </p>
+          ))}
+        </div>
+      )}
+
+      <div className={`result-banner ${bannerClass}`}>
         <span className="result-banner__icon" aria-hidden="true">
-          {fullSuccess ? '✓' : '⚠'}
+          {bannerIcon}
         </span>
         <div>
-          <h3 className="result-banner__title">
-            {fullSuccess ? 'Treatment Successful' : 'Treatment Complicated'}
-          </h3>
+          <h3 className="result-banner__title">{resultStatus}</h3>
           <p className="result-banner__patient">{patient.patientType}</p>
         </div>
       </div>
@@ -90,8 +124,8 @@ export default function ResultScreen({
             <dd>{patient.patientType}</dd>
           </div>
           <div className="clinic-report__row">
-            <dt>Category</dt>
-            <dd>{patient.category}</dd>
+            <dt>Department</dt>
+            <dd>{patient.department}</dd>
           </div>
           <div className="clinic-report__row">
             <dt>Diagnosis</dt>
@@ -106,9 +140,17 @@ export default function ResultScreen({
             </dd>
           </div>
           <div className="clinic-report__row">
-            <dt>Status</dt>
-            <dd className={fullSuccess ? 'clinic-report__correct' : 'clinic-report__incorrect'}>
-              {fullSuccess ? 'Cured' : 'Chaos'}
+            <dt>Result Status</dt>
+            <dd
+              className={
+                fullSuccess
+                  ? 'clinic-report__correct'
+                  : partialSuccess
+                    ? 'clinic-report__partial'
+                    : 'clinic-report__incorrect'
+              }
+            >
+              {resultStatus}
             </dd>
           </div>
           <div className="clinic-report__row">
@@ -117,12 +159,22 @@ export default function ResultScreen({
           </div>
         </dl>
 
-        <button type="button" className="btn btn--secondary btn--large" onClick={handleCopyReport}>
-          Copy Report Text
-        </button>
-        {copyStatus === 'copied' && (
+        <div className="clinic-report__copy-actions">
+          <button type="button" className="btn btn--secondary btn--large" onClick={handleCopyShortPost}>
+            Copy Short Post
+          </button>
+          <button type="button" className="btn btn--secondary btn--large" onClick={handleCopyFullReport}>
+            Copy Full Report
+          </button>
+        </div>
+        {copyStatus === 'short-copied' && (
           <p className="copy-feedback copy-feedback--success" role="status">
-            Report copied to clipboard.
+            Short post copied to clipboard.
+          </p>
+        )}
+        {copyStatus === 'full-copied' && (
+          <p className="copy-feedback copy-feedback--success" role="status">
+            Full report copied to clipboard.
           </p>
         )}
         {copyStatus === 'failed' && (
