@@ -27,7 +27,7 @@
 }
 
 .card--accent {
-  border-left: 4px solid var(--color-accent);
+  border-left: 4px solid var(--color-primary);
 }
 
 /* Buttons */
@@ -49,12 +49,12 @@
 }
 
 .btn--primary {
-  background: var(--color-accent);
+  background: var(--color-primary);
   color: #fff;
 }
 
 .btn--primary:hover:not(:disabled) {
-  background: var(--color-accent-dark);
+  background: var(--color-primary-dark);
 }
 
 .btn--secondary {
@@ -64,7 +64,7 @@
 }
 
 .btn--secondary:hover:not(:disabled) {
-  background: var(--color-bg);
+  background: var(--color-chip-bg);
 }
 
 .btn--ghost {
@@ -205,7 +205,7 @@
 
 .clinic-screen__empty-dept {
   font-size: 0.9rem;
-  color: var(--color-accent);
+  color: #c9922a;
   font-weight: 600;
   text-align: center;
   line-height: 1.5;
@@ -253,7 +253,7 @@
 }
 
 .daily-summary__value--chaos {
-  color: var(--color-accent);
+  color: #c9922a;
 }
 
 .daily-summary__label {
@@ -286,25 +286,29 @@
 }
 
 .department-chip {
-  padding: 0.4rem 0.7rem;
+  padding: 0.45rem 0.85rem;
   border: 1px solid var(--color-border);
   border-radius: 99px;
-  background: var(--color-surface);
+  background: var(--color-chip-bg);
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--color-text-muted);
-  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  box-shadow: 0 1px 3px rgba(23, 32, 51, 0.04);
+  transition: border-color 0.15s, background 0.15s, color 0.15s, box-shadow 0.15s;
 }
 
 .department-chip:hover {
-  border-color: var(--color-accent);
+  border-color: var(--color-primary);
   color: var(--color-navy);
+  background: var(--color-surface);
+  box-shadow: var(--shadow);
 }
 
 .department-chip--active {
-  border-color: var(--color-accent);
-  background: #fdf0ee;
-  color: var(--color-accent);
+  border-color: var(--color-primary);
+  background: var(--color-surface);
+  color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.12);
 }
 
 /* Reset game */
@@ -386,7 +390,7 @@
 
 .xp-bar__fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-accent), #e74c3c);
+  background: linear-gradient(90deg, var(--color-primary), #2d5a8a);
   border-radius: 99px;
   transition: width 0.4s ease;
 }
@@ -465,7 +469,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-bg);
+  background: var(--color-chip-bg);
+  border: 1px solid var(--color-border);
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -478,7 +483,7 @@
 
 .patient-card__category {
   font-size: 0.8rem;
-  color: var(--color-accent);
+  color: var(--color-primary);
   font-weight: 600;
 }
 
@@ -500,9 +505,11 @@
   font-size: 0.95rem;
   font-style: italic;
   color: var(--color-navy);
-  border-left: 3px solid var(--color-accent);
-  padding-left: 0.75rem;
+  background: var(--color-paper);
+  border-left: 3px solid var(--color-primary);
+  padding: 0.6rem 0.75rem;
   margin: 0;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
 
 .medical-report__symptoms {
@@ -523,7 +530,7 @@
   content: '•';
   position: absolute;
   left: 0;
-  color: var(--color-accent);
+  color: var(--color-primary);
   font-weight: bold;
 }
 
@@ -555,13 +562,15 @@
 }
 
 .choice-btn:hover {
-  border-color: var(--color-accent);
+  border-color: var(--color-primary);
+  background: var(--color-chip-bg);
 }
 
 .choice-btn--selected {
-  border-color: var(--color-accent);
-  background: #fdf0ee;
+  border-color: var(--color-primary);
+  background: var(--color-accent-soft);
   font-weight: 600;
+  color: var(--color-navy);
 }
 
 /* Result screen */
@@ -575,12 +584,12 @@
 
 .result-banner--success {
   background: var(--color-success-bg);
-  border: 1px solid var(--color-success);
+  border: 1px solid rgba(47, 158, 115, 0.45);
 }
 
 .result-banner--fail {
   background: var(--color-warning-bg);
-  border: 1px solid var(--color-warning);
+  border: 1px solid rgba(242, 184, 75, 0.55);
 }
 
 .result-banner__icon {
@@ -593,7 +602,7 @@
 }
 
 .result-banner--fail .result-banner__icon {
-  color: var(--color-warning);
+  color: #c9922a;
 }
 
 .result-banner__title {
@@ -659,16 +668,17 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.85rem 1rem;
-  background: linear-gradient(135deg, #fdf0ee, #fff8e6);
-  border: 1px solid var(--color-accent);
+  background: linear-gradient(135deg, #fff8e8, #fef3d4);
+  border: 2px solid var(--color-warning);
   border-radius: var(--radius);
+  box-shadow: 0 2px 12px rgba(242, 184, 75, 0.2);
   animation: fadeIn 0.35s ease;
 }
 
 .rank-up-banner__icon {
   font-size: 1.5rem;
   font-weight: 800;
-  color: var(--color-accent);
+  color: #c9922a;
 }
 
 .rank-up-banner p {
@@ -678,17 +688,39 @@
 }
 
 .rank-up-banner strong {
-  color: var(--color-accent);
+  color: var(--color-primary);
 }
 
 /* Clinic report */
+.clinic-report {
+  background: var(--color-paper);
+  border: 1px solid var(--color-border);
+  box-shadow:
+    0 1px 0 rgba(23, 32, 51, 0.04),
+    var(--shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.clinic-report::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+}
+
 .clinic-report__heading {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-text-muted);
+  letter-spacing: 0.1em;
+  color: var(--color-primary);
   font-weight: 700;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px dashed var(--color-border);
 }
 
 .clinic-report__list {
@@ -703,13 +735,22 @@
   justify-content: space-between;
   align-items: baseline;
   gap: 1rem;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid rgba(229, 224, 216, 0.6);
+}
+
+.clinic-report__row:last-child {
+  border-bottom: none;
 }
 
 .clinic-report__row dt {
   font-weight: 600;
   color: var(--color-text-muted);
   flex-shrink: 0;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .clinic-report__row dd {
@@ -800,7 +841,7 @@
 
 .archive-card__status--fail {
   background: var(--color-warning-bg);
-  color: var(--color-warning);
+  color: #c9922a;
 }
 
 .archive-card__details {
@@ -880,8 +921,8 @@
 }
 
 .rank-item--current {
-  border: 2px solid var(--color-accent);
-  box-shadow: var(--shadow-lg);
+  border: 2px solid var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1), var(--shadow-lg);
 }
 
 .rank-item__header {
@@ -897,7 +938,8 @@
   font-weight: 700;
   text-transform: uppercase;
   color: var(--color-text-muted);
-  background: var(--color-bg);
+  background: var(--color-chip-bg);
+  border: 1px solid var(--color-border);
   padding: 0.15rem 0.5rem;
   border-radius: 99px;
 }
@@ -913,7 +955,7 @@
   font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
-  background: var(--color-accent);
+  background: var(--color-primary);
   color: #fff;
   padding: 0.2rem 0.5rem;
   border-radius: 99px;
