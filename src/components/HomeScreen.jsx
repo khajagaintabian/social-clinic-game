@@ -1,4 +1,18 @@
-export default function HomeScreen({ onStartGame, onRankProgress, onPatientArchive }) {
+import { useState } from 'react';
+
+export default function HomeScreen({
+  onStartGame,
+  onRankProgress,
+  onPatientArchive,
+  onResetGame,
+}) {
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+
+  function handleConfirmReset() {
+    onResetGame();
+    setShowResetConfirm(false);
+  }
+
   return (
     <div className="screen home-screen">
       <header className="home-screen__header">
@@ -27,9 +41,39 @@ export default function HomeScreen({ onStartGame, onRankProgress, onPatientArchi
         </button>
       </nav>
 
+      <div className="home-screen__settings">
+        {!showResetConfirm ? (
+          <button
+            type="button"
+            className="btn btn--ghost btn--danger-text"
+            onClick={() => setShowResetConfirm(true)}
+          >
+            Reset Game
+          </button>
+        ) : (
+          <div className="reset-confirm card">
+            <p className="reset-confirm__text">
+              Reset all progress? This clears saved XP, stats, archive, and daily summary. Cannot be undone.
+            </p>
+            <div className="reset-confirm__actions">
+              <button
+                type="button"
+                className="btn btn--secondary"
+                onClick={() => setShowResetConfirm(false)}
+              >
+                Cancel
+              </button>
+              <button type="button" className="btn btn--danger" onClick={handleConfirmReset}>
+                Yes, Reset
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
       <footer className="home-screen__footer">
         <span>Social Clinic: Diagnosis of Society</span>
-        <span className="home-screen__version">MVP v1.0</span>
+        <span className="home-screen__version">Phase 3</span>
       </footer>
     </div>
   );

@@ -203,6 +203,153 @@
   font-style: italic;
 }
 
+.clinic-screen__empty-dept {
+  font-size: 0.9rem;
+  color: var(--color-accent);
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* Daily summary */
+.daily-summary {
+  padding: 0.85rem 1rem;
+}
+
+.daily-summary__title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  font-weight: 700;
+  margin-bottom: 0.65rem;
+}
+
+.daily-summary__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.daily-summary__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.daily-summary__value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-navy);
+}
+
+.daily-summary__value--success {
+  color: var(--color-success);
+}
+
+.daily-summary__value--fail {
+  color: var(--color-accent);
+}
+
+.daily-summary__value--chaos {
+  color: var(--color-accent);
+}
+
+.daily-summary__label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+/* Department filter */
+.department-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.department-filter__label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  font-weight: 700;
+}
+
+.department-filter__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.department-chip {
+  padding: 0.4rem 0.7rem;
+  border: 1px solid var(--color-border);
+  border-radius: 99px;
+  background: var(--color-surface);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.department-chip:hover {
+  border-color: var(--color-accent);
+  color: var(--color-navy);
+}
+
+.department-chip--active {
+  border-color: var(--color-accent);
+  background: #fdf0ee;
+  color: var(--color-accent);
+}
+
+/* Reset game */
+.home-screen__settings {
+  margin-top: 0.5rem;
+}
+
+.btn--danger-text {
+  color: var(--color-accent);
+  font-size: 0.85rem;
+}
+
+.btn--danger-text:hover {
+  color: var(--color-accent-dark);
+}
+
+.btn--danger {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.btn--danger:hover:not(:disabled) {
+  background: var(--color-accent-dark);
+}
+
+.reset-confirm {
+  text-align: left;
+}
+
+.reset-confirm__text {
+  font-size: 0.9rem;
+  color: var(--color-text);
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+
+.reset-confirm__actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.reset-confirm__actions .btn {
+  flex: 1;
+}
+
 /* XP Bar */
 .xp-bar {
   display: flex;

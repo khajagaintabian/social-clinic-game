@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import HomeScreen from './components/HomeScreen';
 import ClinicScreen from './components/ClinicScreen';
 import PatientCaseScreen from './components/PatientCaseScreen';
@@ -6,7 +6,15 @@ import ResultScreen from './components/ResultScreen';
 import RankProgressScreen from './components/RankProgressScreen';
 import PatientArchiveScreen from './components/PatientArchiveScreen';
 import { getRankForXp, getXpProgress } from './data/ranks';
-import { getRandomPatient } from './data/patientCases';
+import { getRandomPatient, hasUnlockedPatients } from './data/patientCases';
+import {
+  loadGameState,
+  saveGameState,
+  clearGameStorage,
+  INITIAL_GAME_STATE,
+  createFreshDailySummary,
+  normalizeDailySummary,
+} from './utils/gameStorage';
 import './App.css';
 
 const SCREENS = {
@@ -19,22 +27,51 @@ const SCREENS = {
 };
 
 function App() {
+  const saved = loadGameState();
+
   const [screen, setScreen] = useState(SCREENS.HOME);
-  const [xp, setXp] = useState(0);
-  const [reputation, setReputation] = useState(0);
-  const [coins, setCoins] = useState(0);
-  const [chaosPoints, setChaosPoints] = useState(0);
-  const [patientsCured, setPatientsCured] = useState(0);
+  const [xp, setXp] = useState(saved.xp);
+  const [reputation, setReputation] = useState(saved.reputation);
+  const [coins, setCoins] = useState(saved.coins);
+  const [chaosPoints, setChaosPoints] = useState(saved.chaosPoints);
+  const [patientsCured, setPatientsCured] = useState(saved.patientsCured);
   const [currentPatient, setCurrentPatient] = useState(null);
   const [selectedDiagnosis, setSelectedDiagnosis] = useState(null);
   const [selectedTreatment, setSelectedTreatment] = useState(null);
   const [lastResult, setLastResult] = useState(null);
   const [rankUp, setRankUp] = useState(null);
-  const [patientReports, setPatientReports] = useState([]);
+  const [patientReports, setPatientReports] = useState(saved.patientReports);
   const [returnScreen, setReturnScreen] = useState(SCREENS.HOME);
+  const [lastPlayedCaseId, setLastPlayedCaseId] = useState(saved.lastPlayedCaseId);
+  const [selectedDepartment, setSelectedDepartment] = useState(saved.selectedDepartment);
+  const [dailySummary, setDailySummary] = useState(saved.dailySummary);
 
   const rank = getRankForXp(xp);
   const xpProgress = getXpProgress(xp);
+
+  useEffect(() => {
+    saveGameState({
+      xp,
+      reputation,
+      coins,
+      chaosPoints,
+      patientsCured,
+      patientReports,
+      lastPlayedCaseId,
+      selectedDepartment,
+      dailySummary: normalizeDailySummary(dailySummary),
+    });
+  }, [
+    xp,
+    reputation,
+    coins,
+    chaosPoints,
+    patientsCured,
+    patientReports,
+    lastPlayedCaseId,
+    selectedDepartment,
+    dailySummary,
+  ]);
 
   function startGame() {
     setScreen(SCREENS.CLINIC);
@@ -50,12 +87,20 @@ function App() {
     setScreen(SCREENS.ARCHIVE);
   }
 
+  function handleDepartmentChange(department) {
+    setSelectedDepartment(department);
+  }
+
   function callNextPatient(excludeId = null) {
-    const patient = getRandomPatient(rank.level, excludeId);
+    const patient = getRandomPatient(rank.level, excludeId, selectedDepartment);
+    if (!patient) return false;
+
     setCurrentPatient(patient);
+    setLastPlayedCaseId(patient.id);
     setSelectedDiagnosis(null);
     setSelectedTreatment(null);
     setScreen(SCREENS.PATIENT);
+    return true;
   }
 
   function confirmTreatment() {
@@ -92,6 +137,19 @@ function App() {
     setReputation((v) => Math.max(0, v + reputationChange));
     setCoins((v) => v + coinsGained);
     setChaosPoints((v) => v + chaosGained);
+
+    setDailySummary((prev) => {
+      const base = normalizeDailySummary(prev);
+      return {
+        ...base,
+        casesHandled: base.casesHandled + 1,
+        cured: base.cured + (fullSuccess ? 1 : 0),
+        failed: base.failed + (fullSuccess ? 0 : 1),
+        xpEarned: base.xpEarned + xpGained,
+        reputationChange: base.reputationChange + reputationChange,
+        chaosGained: base.chaosGained + chaosGained,
+      };
+    });
 
     const resultText = fullSuccess ? currentPatient.successResult : currentPatient.failResult;
     const dateTime = new Date().toLocaleString();
@@ -135,8 +193,32 @@ function App() {
   }
 
   function handleNextPatient() {
-    callNextPatient(currentPatient?.id);
+    const success = callNextPatient(currentPatient?.id);
+    if (!success) {
+      setScreen(SCREENS.CLINIC);
+    }
   }
+
+  function resetGame() {
+    clearGameStorage();
+    setXp(INITIAL_GAME_STATE.xp);
+    setReputation(INITIAL_GAME_STATE.reputation);
+    setCoins(INITIAL_GAME_STATE.coins);
+    setChaosPoints(INITIAL_GAME_STATE.chaosPoints);
+    setPatientsCured(INITIAL_GAME_STATE.patientsCured);
+    setPatientReports(INITIAL_GAME_STATE.patientReports);
+    setLastPlayedCaseId(INITIAL_GAME_STATE.lastPlayedCaseId);
+    setSelectedDepartment(INITIAL_GAME_STATE.selectedDepartment);
+    setDailySummary(createFreshDailySummary());
+    setCurrentPatient(null);
+    setSelectedDiagnosis(null);
+    setSelectedTreatment(null);
+    setLastResult(null);
+    setRankUp(null);
+    setScreen(SCREENS.HOME);
+  }
+
+  const departmentHasPatients = hasUnlockedPatients(rank.level, selectedDepartment);
 
   return (
     <div className="app">
@@ -145,6 +227,7 @@ function App() {
           onStartGame={startGame}
           onRankProgress={() => openRankProgress(SCREENS.HOME)}
           onPatientArchive={() => openPatientArchive(SCREENS.HOME)}
+          onResetGame={resetGame}
         />
       )}
 
@@ -156,6 +239,10 @@ function App() {
           coins={coins}
           chaosPoints={chaosPoints}
           patientsCured={patientsCured}
+          dailySummary={dailySummary}
+          selectedDepartment={selectedDepartment}
+          departmentHasPatients={departmentHasPatients}
+          onDepartmentChange={handleDepartmentChange}
           onCallPatient={() => callNextPatient()}
           onRankProgress={() => openRankProgress(SCREENS.CLINIC)}
           onHome={() => setScreen(SCREENS.HOME)}
